@@ -12,7 +12,7 @@ def birthday_days(
     start: datetime.date,
     end: datetime.date,
     granularity: int = 100
-) -> Iterator[tuple[int, datetime.date]]:
+) -> Iterator[tuple[datetime.date, str]]:
     day_start = (start - birthday).days
     day_end = (end - birthday).days
     for i in range(1, 500):
@@ -23,7 +23,7 @@ def birthday_days(
             break
         date = birthday + datetime.timedelta(days=days)
         if start < date < end:
-            yield days, date
+            yield date, f"{days} days"
 
 
 def main():
@@ -41,9 +41,10 @@ def main():
     birthday = datetime.date(int(bday_year), int(bday_month), int(bday_day))
     today = datetime.date.today()
     future_threshold = today + datetime.timedelta(days=365 * 5)
-    print(f'Day-birthdays for {birthday}')
-    for days, date in birthday_days(birthday, today, future_threshold):
-        print(days, date)
+    birthday_list: list[tuple[datetime.date, str]] = list()
+    birthday_list += list(birthday_days(birthday, today, future_threshold))
+    for date, description in sorted(birthday_list):
+        print(date, description)
 
 
 if __name__ == '__main__':
