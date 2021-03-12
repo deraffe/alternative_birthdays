@@ -76,6 +76,8 @@ birthday_mercury = birthday_planet(
     'Mercury', datetime.timedelta(seconds=7600530)
 )
 
+birthday_venus = birthday_planet('Venus', datetime.timedelta(seconds=19414166))
+
 
 def main():
     parser = argparse.ArgumentParser()
@@ -96,6 +98,7 @@ def main():
     birthday_list += list(birthday_hours(birthday, today, future_threshold))
     birthday_list += list(birthday_days(birthday, today, future_threshold))
     birthday_list += list(birthday_mercury(birthday, today, future_threshold))
+    birthday_list += list(birthday_venus(birthday, today, future_threshold))
     for date, description in sorted(birthday_list):
         print(date, description)
 
