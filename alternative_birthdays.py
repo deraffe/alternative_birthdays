@@ -7,6 +7,25 @@ from typing import Iterator
 log = logging.getLogger(__name__)
 
 
+def birthday_hours(
+    birthday: datetime.date,
+    start: datetime.date,
+    end: datetime.date,
+    granularity: int = 10000
+) -> Iterator[tuple[datetime.date, str]]:
+    hour_start = (start - birthday).days * 24
+    hour_end = (end - birthday).days * 24
+    for i in range(1, 120):
+        hours = i * granularity
+        if hours < hour_start:
+            continue
+        if hours > hour_end:
+            break
+        date = birthday + datetime.timedelta(hours=hours)
+        if start < date < end:
+            yield date, f"{hours} hours"
+
+
 def birthday_days(
     birthday: datetime.date,
     start: datetime.date,
@@ -42,6 +61,7 @@ def main():
     today = datetime.date.today()
     future_threshold = today + datetime.timedelta(days=365 * 5)
     birthday_list: list[tuple[datetime.date, str]] = list()
+    birthday_list += list(birthday_hours(birthday, today, future_threshold))
     birthday_list += list(birthday_days(birthday, today, future_threshold))
     for date, description in sorted(birthday_list):
         print(date, description)
