@@ -2,7 +2,7 @@
 import argparse
 import datetime
 import logging
-from typing import Iterator
+from typing import Callable, Iterator
 
 log = logging.getLogger(__name__)
 
@@ -45,6 +45,38 @@ def birthday_days(
             yield date, f"{days} days"
 
 
+def birthday_planet(
+    planet_name: str, orbital_period: datetime.timedelta
+) -> Callable:
+    granularity = 1
+    range_end = datetime.timedelta(days=50000) // orbital_period
+
+    def bday_planet(
+        birthday: datetime.date,
+        start: datetime.date,
+        end: datetime.date,
+        granularity: int = granularity
+    ) -> Iterator[tuple[datetime.date, str]]:
+        planet_start = (start - birthday) // orbital_period
+        planet_end = (end - birthday) // orbital_period
+        for i in range(1, range_end):
+            pyears = i * granularity
+            if pyears < planet_start:
+                continue
+            if pyears > planet_end:
+                break
+            date = birthday + pyears * orbital_period
+            if start < date < end:
+                yield date, f"{pyears} {planet_name} years"
+
+    return bday_planet
+
+
+birthday_mercury = birthday_planet(
+    'Mercury', datetime.timedelta(seconds=7600530)
+)
+
+
 def main():
     parser = argparse.ArgumentParser()
     parser.add_argument(
@@ -63,6 +95,7 @@ def main():
     birthday_list: list[tuple[datetime.date, str]] = list()
     birthday_list += list(birthday_hours(birthday, today, future_threshold))
     birthday_list += list(birthday_days(birthday, today, future_threshold))
+    birthday_list += list(birthday_mercury(birthday, today, future_threshold))
     for date, description in sorted(birthday_list):
         print(date, description)
 
