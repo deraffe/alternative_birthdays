@@ -13,8 +13,8 @@ def birthday_hours(
     end: datetime.date,
     granularity: int = 10000
 ) -> Iterator[tuple[datetime.date, str]]:
-    hour_start = (start - birthday).days * 24
-    hour_end = (end - birthday).days * 24
+    hour_start = (start - birthday).total_seconds() / (60 * 60)
+    hour_end = (end - birthday).total_seconds() / (60 * 60)
     for i in range(1, 120):
         hours = i * granularity
         if hours < hour_start:
@@ -32,8 +32,8 @@ def birthday_days(
     end: datetime.date,
     granularity: int = 100
 ) -> Iterator[tuple[datetime.date, str]]:
-    day_start = (start - birthday).days
-    day_end = (end - birthday).days
+    day_start = (start - birthday).total_seconds() / (60 * 60 * 24)
+    day_end = (end - birthday).total_seconds() / (60 * 60 * 24)
     for i in range(1, 500):
         days = i * granularity
         if days < day_start:
