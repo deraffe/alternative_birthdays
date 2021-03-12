@@ -72,11 +72,12 @@ def birthday_planet(
     return bday_planet
 
 
-birthday_mercury = birthday_planet(
-    'Mercury', datetime.timedelta(seconds=7600530)
-)
-
-birthday_venus = birthday_planet('Venus', datetime.timedelta(seconds=19414166))
+birthday_generators = [
+    birthday_hours,
+    birthday_days,
+    birthday_planet('Mercury', datetime.timedelta(seconds=7600530)),
+    birthday_planet('Venus', datetime.timedelta(seconds=19414166)),
+]
 
 
 def main():
@@ -95,10 +96,8 @@ def main():
     today = datetime.date.today()
     future_threshold = today + datetime.timedelta(days=365 * 5)
     birthday_list: list[tuple[datetime.date, str]] = list()
-    birthday_list += list(birthday_hours(birthday, today, future_threshold))
-    birthday_list += list(birthday_days(birthday, today, future_threshold))
-    birthday_list += list(birthday_mercury(birthday, today, future_threshold))
-    birthday_list += list(birthday_venus(birthday, today, future_threshold))
+    for generator in birthday_generators:
+        birthday_list += list(generator(birthday, today, future_threshold))
     for date, description in sorted(birthday_list):
         print(date, description)
 
