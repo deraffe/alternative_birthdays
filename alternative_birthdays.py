@@ -73,10 +73,12 @@ def birthday_planet(
 
 
 birthday_generators = [
-    birthday_hours, birthday_days,
+    birthday_hours,
+    birthday_days,
     birthday_planet('Mercury', datetime.timedelta(seconds=7600530.24)),
     birthday_planet('Venus', datetime.timedelta(seconds=19414166.4)),
-    birthday_planet('Earth', datetime.timedelta(seconds=31558149.7635))
+    birthday_planet('Earth', datetime.timedelta(seconds=31558149.7635)),
+    birthday_planet('Mars', datetime.timedelta(seconds=59354294.4)),
 ]
 
 
