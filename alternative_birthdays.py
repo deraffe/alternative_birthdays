@@ -17,11 +17,11 @@ def birthday_timeunit(
     )
 
     def bday_time(
-        birthday: datetime.date,
-        start: datetime.date,
-        end: datetime.date,
+        birthday: datetime.datetime,
+        start: datetime.datetime,
+        end: datetime.datetime,
         granularity: float = granularity
-    ) -> Iterator[tuple[datetime.date, str]]:
+    ) -> Iterator[tuple[datetime.datetime, str]]:
         time_start = (start - birthday).total_seconds() / seconds
         time_end = (end - birthday).total_seconds() / seconds
         for i in range(1, range_end):
@@ -50,11 +50,11 @@ def birthday_planet(
                                    ) // (orbital_period * granularity)
 
     def bday_planet(
-        birthday: datetime.date,
-        start: datetime.date,
-        end: datetime.date,
+        birthday: datetime.datetime,
+        start: datetime.datetime,
+        end: datetime.datetime,
         granularity: float = granularity
-    ) -> Iterator[tuple[datetime.date, str]]:
+    ) -> Iterator[tuple[datetime.datetime, str]]:
         planet_start = (start - birthday) / orbital_period
         planet_end = (end - birthday) / orbital_period
         for i in range(1, range_end):
@@ -90,9 +90,9 @@ birthday_generators = [
 ]
 
 
-def parse_date(input_str: str) -> datetime.date:
+def parse_date(input_str: str) -> datetime.datetime:
     year, month, day = input_str.split('-', 2)
-    date = datetime.date(int(year), int(month), int(day))
+    date = datetime.datetime(int(year), int(month), int(day))
     return date
 
 
@@ -113,7 +113,7 @@ def main():
     logging.basicConfig(level=loglevel)
 
     birthday = parse_date(args.birthday)
-    today = datetime.date.today()
+    today = datetime.datetime.today()
     if args.start:
         start = parse_date(args.start)
     else:
@@ -122,7 +122,7 @@ def main():
         end = parse_date(args.end)
     else:
         end = today + datetime.timedelta(days=365 * 3)
-    birthday_list: list[tuple[datetime.date, str]] = list()
+    birthday_list: list[tuple[datetime.datetime, str]] = list()
     for generator in birthday_generators:
         birthday_list += list(generator(birthday, start, end))
     for date, description in sorted(birthday_list):
