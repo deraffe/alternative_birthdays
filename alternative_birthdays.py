@@ -104,7 +104,7 @@ def parse_datetime(input_str: str) -> datetime.datetime:
     datestr, timestr = input_str.split(' ', 1)
     date = parse_date(datestr)
     hour, minute = timestr.split(':', 1)
-    date.replace(hour=int(hour), minute=int(minute))
+    date = date.replace(hour=int(hour), minute=int(minute))
     return date
 
 
