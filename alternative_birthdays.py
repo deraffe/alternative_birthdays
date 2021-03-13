@@ -46,19 +46,20 @@ def birthday_days(
 
 
 def birthday_planet(
-    planet_name: str, orbital_period: datetime.timedelta
+    planet_name: str,
+    orbital_period: datetime.timedelta,
+    granularity: float = 1.0
 ) -> Callable:
-    granularity = 1
     range_end = datetime.timedelta(days=50000) // orbital_period
 
     def bday_planet(
         birthday: datetime.date,
         start: datetime.date,
         end: datetime.date,
-        granularity: int = granularity
+        granularity: float = granularity
     ) -> Iterator[tuple[datetime.date, str]]:
-        planet_start = (start - birthday) // orbital_period
-        planet_end = (end - birthday) // orbital_period
+        planet_start = (start - birthday) / orbital_period
+        planet_end = (end - birthday) / orbital_period
         for i in range(1, range_end):
             pyears = i * granularity
             if pyears < planet_start:
@@ -67,7 +68,11 @@ def birthday_planet(
                 break
             date = birthday + pyears * orbital_period
             if start < date < end:
-                yield date, f"{pyears} {planet_name} years"
+                if granularity < 1:
+                    description = f"{pyears:0.2f} {planet_name} years"
+                else:
+                    description = f"{pyears:0.0f} {planet_name} years"
+                yield date, description
 
     return bday_planet
 
@@ -79,6 +84,7 @@ birthday_generators = [
     birthday_planet('Venus', datetime.timedelta(seconds=19414166.4)),
     birthday_planet('Earth', datetime.timedelta(seconds=31558149.7635)),
     birthday_planet('Mars', datetime.timedelta(seconds=59354294.4)),
+    birthday_planet('Jupiter', datetime.timedelta(seconds=374335776), 0.1),
 ]
 
 
