@@ -80,7 +80,7 @@ birthday_generators = [
     birthday_timeunit('weeks', 60 * 60 * 24 * 7, 100),
     birthday_planet('Mercury', datetime.timedelta(seconds=7600530.24)),
     birthday_planet('Venus', datetime.timedelta(seconds=19414166.4)),
-    birthday_planet('Earth', datetime.timedelta(seconds=31558149.7635)),
+    birthday_planet('Earth', datetime.timedelta(days=365.256363004)),
     birthday_planet('Mars', datetime.timedelta(seconds=59354294.4)),
     birthday_planet('Jupiter', datetime.timedelta(seconds=374335776), 0.1),
     birthday_planet('Saturn', datetime.timedelta(seconds=929596608), 0.01),
