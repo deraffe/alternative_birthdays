@@ -96,12 +96,23 @@ def parse_date(input_str: str) -> datetime.datetime:
     return date
 
 
+def parse_datetime(input_str: str) -> datetime.datetime:
+    datestr, timestr = input_str.split(' ', 1)
+    date = parse_date(datestr)
+    hour, minute = timestr.split(':', 1)
+    date.replace(hour=int(hour), minute=int(minute))
+    return date
+
+
 def main():
     parser = argparse.ArgumentParser()
     parser.add_argument(
         '--loglevel', default='WARNING', help="Loglevel", action='store'
     )
-    parser.add_argument('birthday', help='Birthday in ISO format (YYYY-MM-DD)')
+    parser.add_argument(
+        'birthday',
+        help='Birthday in ISO format (YYYY-MM-DD HH:MM), time is optional'
+    )
     parser.add_argument(
         '--start', help='start date in ISO format (YYYY-MM-DD)'
     )
@@ -112,7 +123,10 @@ def main():
         raise ValueError('Invalid log level: {}'.format(args.loglevel))
     logging.basicConfig(level=loglevel)
 
-    birthday = parse_date(args.birthday)
+    if ':' in args.birthday:
+        birthday = parse_datetime(args.birthday)
+    else:
+        birthday = parse_date(args.birthday)
     today = datetime.datetime.today()
     if args.start:
         start = parse_date(args.start)
