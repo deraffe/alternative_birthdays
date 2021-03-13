@@ -6,6 +6,40 @@ from typing import Callable, Iterator
 
 log = logging.getLogger(__name__)
 
+MORE_THAN_A_LIFETIME = datetime.timedelta(days=50000)
+
+
+def birthday_timeunit(
+    unit_name: str, seconds: int, granularity: int = 1
+) -> Callable:
+    range_end = MORE_THAN_A_LIFETIME // (
+        datetime.timedelta(seconds=seconds) * granularity
+    )
+
+    def bday_time(
+        birthday: datetime.date,
+        start: datetime.date,
+        end: datetime.date,
+        granularity: float = granularity
+    ) -> Iterator[tuple[datetime.date, str]]:
+        time_start = (start - birthday).total_seconds() / seconds
+        time_end = (end - birthday).total_seconds() / seconds
+        for i in range(1, range_end):
+            units = i * granularity
+            if units < time_start:
+                continue
+            if units > time_end:
+                break
+            date = birthday + units * datetime.timedelta(seconds=seconds)
+            if start < date < end:
+                if granularity < 1:
+                    description = f"{units:.2f} {unit_name}"
+                else:
+                    description = f"{units:.0f} {unit_name}"
+                yield date, description
+
+    return bday_time
+
 
 def birthday_hours(
     birthday: datetime.date,
@@ -79,7 +113,7 @@ def birthday_planet(
 
 
 birthday_generators = [
-    birthday_hours,
+    birthday_timeunit('hours', 60 * 60, 10000),
     birthday_days,
     birthday_planet('Mercury', datetime.timedelta(seconds=7600530.24)),
     birthday_planet('Venus', datetime.timedelta(seconds=19414166.4)),
