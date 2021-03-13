@@ -88,24 +88,41 @@ birthday_generators = [
 ]
 
 
+def parse_date(input_str: str) -> datetime.date:
+    year, month, day = input_str.split('-', 2)
+    date = datetime.date(int(year), int(month), int(day))
+    return date
+
+
 def main():
     parser = argparse.ArgumentParser()
     parser.add_argument(
         '--loglevel', default='WARNING', help="Loglevel", action='store'
     )
     parser.add_argument('birthday', help='Birthday in ISO format (YYYY-MM-DD)')
+    parser.add_argument(
+        '--start', help='start date in ISO format (YYYY-MM-DD)'
+    )
+    parser.add_argument('--end', help='end date in ISO format (YYYY-MM-DD)')
     args = parser.parse_args()
     loglevel = getattr(logging, args.loglevel.upper(), None)
     if not isinstance(loglevel, int):
         raise ValueError('Invalid log level: {}'.format(args.loglevel))
     logging.basicConfig(level=loglevel)
-    bday_year, bday_month, bday_day = args.birthday.split('-', 2)
-    birthday = datetime.date(int(bday_year), int(bday_month), int(bday_day))
+
+    birthday = parse_date(args.birthday)
     today = datetime.date.today()
-    future_threshold = today + datetime.timedelta(days=365 * 5)
+    if args.start:
+        start = parse_date(args.start)
+    else:
+        start = today
+    if args.end:
+        end = parse_date(args.end)
+    else:
+        end = today + datetime.timedelta(days=365 * 5)
     birthday_list: list[tuple[datetime.date, str]] = list()
     for generator in birthday_generators:
-        birthday_list += list(generator(birthday, today, future_threshold))
+        birthday_list += list(generator(birthday, start, end))
     for date, description in sorted(birthday_list):
         print(date, description)
 
