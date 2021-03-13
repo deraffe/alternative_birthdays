@@ -121,7 +121,7 @@ def main():
     if args.end:
         end = parse_date(args.end)
     else:
-        end = today + datetime.timedelta(days=365 * 5)
+        end = today + datetime.timedelta(days=365 * 3)
     birthday_list: list[tuple[datetime.date, str]] = list()
     for generator in birthday_generators:
         birthday_list += list(generator(birthday, start, end))
