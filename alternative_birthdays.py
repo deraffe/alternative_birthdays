@@ -96,7 +96,7 @@ birthday_generators = [
 
 def parse_date(input_str: str) -> datetime.datetime:
     year, month, day = input_str.split('-', 2)
-    date = datetime.datetime(int(year), int(month), int(day))
+    date = datetime.datetime(int(year), int(month), int(day), 12, 0)
     return date
 
 
