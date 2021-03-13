@@ -50,7 +50,8 @@ def birthday_planet(
     orbital_period: datetime.timedelta,
     granularity: float = 1.0
 ) -> Callable:
-    range_end = datetime.timedelta(days=50000) // orbital_period
+    range_end = datetime.timedelta(days=50000
+                                   ) // (orbital_period * granularity)
 
     def bday_planet(
         birthday: datetime.date,
