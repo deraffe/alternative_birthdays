@@ -126,7 +126,7 @@ def main():
     for generator in birthday_generators:
         birthday_list += list(generator(birthday, start, end))
     for date, description in sorted(birthday_list):
-        print(date, description)
+        print(f"{date:%F %H:%M %z} {description}")
 
 
 if __name__ == '__main__':
