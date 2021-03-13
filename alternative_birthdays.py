@@ -41,44 +41,6 @@ def birthday_timeunit(
     return bday_time
 
 
-def birthday_hours(
-    birthday: datetime.date,
-    start: datetime.date,
-    end: datetime.date,
-    granularity: int = 10000
-) -> Iterator[tuple[datetime.date, str]]:
-    hour_start = (start - birthday).total_seconds() / (60 * 60)
-    hour_end = (end - birthday).total_seconds() / (60 * 60)
-    for i in range(1, 120):
-        hours = i * granularity
-        if hours < hour_start:
-            continue
-        if hours > hour_end:
-            break
-        date = birthday + datetime.timedelta(hours=hours)
-        if start < date < end:
-            yield date, f"{hours} hours"
-
-
-def birthday_days(
-    birthday: datetime.date,
-    start: datetime.date,
-    end: datetime.date,
-    granularity: int = 100
-) -> Iterator[tuple[datetime.date, str]]:
-    day_start = (start - birthday).total_seconds() / (60 * 60 * 24)
-    day_end = (end - birthday).total_seconds() / (60 * 60 * 24)
-    for i in range(1, 500):
-        days = i * granularity
-        if days < day_start:
-            continue
-        if days > day_end:
-            break
-        date = birthday + datetime.timedelta(days=days)
-        if start < date < end:
-            yield date, f"{days} days"
-
-
 def birthday_planet(
     planet_name: str,
     orbital_period: datetime.timedelta,
@@ -114,7 +76,7 @@ def birthday_planet(
 
 birthday_generators = [
     birthday_timeunit('hours', 60 * 60, 10000),
-    birthday_days,
+    birthday_timeunit('days', 60 * 60 * 24, 100),
     birthday_planet('Mercury', datetime.timedelta(seconds=7600530.24)),
     birthday_planet('Venus', datetime.timedelta(seconds=19414166.4)),
     birthday_planet('Earth', datetime.timedelta(seconds=31558149.7635)),
