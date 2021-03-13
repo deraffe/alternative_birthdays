@@ -70,9 +70,9 @@ def birthday_planet(
             date = birthday + pyears * orbital_period
             if start < date < end:
                 if granularity < 1:
-                    description = f"{pyears:0.2f} {planet_name} years"
+                    description = f"{pyears:.2f} {planet_name} years"
                 else:
-                    description = f"{pyears:0.0f} {planet_name} years"
+                    description = f"{pyears:.0f} {planet_name} years"
                 yield date, description
 
     return bday_planet
@@ -87,6 +87,7 @@ birthday_generators = [
     birthday_planet('Mars', datetime.timedelta(seconds=59354294.4)),
     birthday_planet('Jupiter', datetime.timedelta(seconds=374335776), 0.1),
     birthday_planet('Saturn', datetime.timedelta(seconds=929596608), 0.01),
+    birthday_planet('Uranus', datetime.timedelta(seconds=2651486400), 0.01),
 ]
 
 
