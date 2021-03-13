@@ -51,12 +51,15 @@ def main():
     if not isinstance(loglevel, int):
         raise ValueError('Invalid log level: {}'.format(args.loglevel))
     logging.basicConfig(level=loglevel)
-    start = datetime.datetime(1999, 1, 1, 12, 0)
-    for i in range(365 * 3):
+    start = datetime.datetime(1985, 1, 1, 12, 0)
+    lastratio = 0.0
+    for i in range(365 * 20):
         bday = start + datetime.timedelta(days=1) * i
         log.info(f'{bday=}')
         truebday = true_birthday(bday)
-        print(bday, truebday.ratio)
+        if lastratio != truebday.ratio:
+            print(bday, truebday.ratio)
+            lastratio = truebday.ratio
 
 
 if __name__ == '__main__':
