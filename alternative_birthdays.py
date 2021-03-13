@@ -88,6 +88,8 @@ birthday_generators = [
     birthday_planet('Jupiter', datetime.timedelta(seconds=374335776), 0.1),
     birthday_planet('Saturn', datetime.timedelta(seconds=929596608), 0.01),
     birthday_planet('Uranus', datetime.timedelta(seconds=2651486400), 0.01),
+    birthday_planet('Neptune', datetime.timedelta(seconds=5199724800), 0.01),
+    birthday_planet('Pluto', datetime.timedelta(seconds=7824384000), 0.01),
 ]
 
 
