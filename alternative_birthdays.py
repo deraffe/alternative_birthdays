@@ -128,8 +128,10 @@ def main():
     logging.basicConfig(level=loglevel)
 
     if ':' in args.birthday:
+        log.debug('birthday has time')
         birthday = parse_datetime(args.birthday)
     else:
+        log.debug('birthday is blank date, assuming 12:00')
         birthday = parse_date(args.birthday)
     today = datetime.datetime.today()
     if args.start:
