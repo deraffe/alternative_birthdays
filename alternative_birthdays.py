@@ -63,7 +63,11 @@ def birthday_planet(
                 continue
             if pyears > planet_end:
                 break
-            date = birthday + pyears * orbital_period
+            time_passed = pyears * orbital_period
+            date = birthday + time_passed
+            log.debug(
+                f'{birthday=} {granularity=} {i=} {pyears=} {date=} {planet_name=} {time_passed=}'
+            )
             if start < date < end:
                 if granularity < 1:
                     description = f"{pyears:.2f} {planet_name} years"
