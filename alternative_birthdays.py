@@ -77,6 +77,7 @@ def birthday_planet(
 birthday_generators = [
     birthday_timeunit('hours', 60 * 60, 10000),
     birthday_timeunit('days', 60 * 60 * 24, 100),
+    birthday_timeunit('weeks', 60 * 60 * 24 * 7, 100),
     birthday_planet('Mercury', datetime.timedelta(seconds=7600530.24)),
     birthday_planet('Venus', datetime.timedelta(seconds=19414166.4)),
     birthday_planet('Earth', datetime.timedelta(seconds=31558149.7635)),
