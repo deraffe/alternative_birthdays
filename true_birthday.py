@@ -12,9 +12,12 @@ EARTH_ORBITAL_PERIOD = datetime.timedelta(days=365.256363004)
 @dataclasses.dataclass
 class TrueBirthday:
     birthday: datetime.datetime
-    is_true: bool
     true_days: set[datetime.datetime]
     false_days: set[datetime.datetime]
+
+    @property
+    def ratio(self):
+        return len(self.true_days) / len(self.false_days)
 
 
 def true_birthday(
@@ -28,7 +31,6 @@ def true_birthday(
     true_days = set()
     false_days = set()
     log.debug(f'true_birthday({birthday=}, {timespan=})')
-    is_true = True
     while cur_date <= max_date:
         cur_date += EARTH_ORBITAL_PERIOD
         log.debug(f'cur_date={cur_date:%F %H:%M:%S %z}')
@@ -36,10 +38,7 @@ def true_birthday(
             true_days.add(cur_date)
         else:
             false_days.add(cur_date)
-            is_true = False
-    if not is_true:
-        log.debug(f'{birthday=} is false')
-    return TrueBirthday(birthday, is_true, true_days, false_days)
+    return TrueBirthday(birthday, true_days, false_days)
 
 
 def main():
@@ -57,8 +56,7 @@ def main():
         bday = start + datetime.timedelta(days=1) * i
         log.info(f'{bday=}')
         truebday = true_birthday(bday)
-        if truebday.is_true:
-            print(bday)
+        print(bday, truebday.ratio)
 
 
 if __name__ == '__main__':
