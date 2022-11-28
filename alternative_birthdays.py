@@ -32,8 +32,10 @@ def birthday_timeunit(
                 break
             date = birthday + units * datetime.timedelta(seconds=seconds)
             if start < date < end:
-                if granularity < 1:
+                if granularity < 0.1:
                     description = f"{units:.2f} {unit_name}"
+                if granularity < 1:
+                    description = f"{units:.1f} {unit_name}"
                 else:
                     description = f"{units:.0f} {unit_name}"
                 yield date, description
@@ -69,8 +71,10 @@ def birthday_planet(
                 f'{birthday=} {granularity=} {i=} {pyears=} {date=} {planet_name=} {time_passed=}'
             )
             if start < date < end:
-                if granularity < 1:
+                if granularity < 0.1:
                     description = f"{pyears:.2f} {planet_name} years"
+                if granularity < 1:
+                    description = f"{pyears:.1f} {planet_name} years"
                 else:
                     description = f"{pyears:.0f} {planet_name} years"
                 yield date, description
