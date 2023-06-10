@@ -34,7 +34,7 @@ def birthday_timeunit(
             if start < date < end:
                 if granularity < 0.1:
                     description = f"{units:.2f} {unit_name}"
-                if granularity < 1:
+                elif granularity < 1:
                     description = f"{units:.1f} {unit_name}"
                 else:
                     description = f"{units:.0f} {unit_name}"
@@ -73,7 +73,7 @@ def birthday_planet(
             if start < date < end:
                 if granularity < 0.1:
                     description = f"{pyears:.2f} {planet_name} years"
-                if granularity < 1:
+                elif granularity < 1:
                     description = f"{pyears:.1f} {planet_name} years"
                 else:
                     description = f"{pyears:.0f} {planet_name} years"
