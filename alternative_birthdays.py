@@ -10,8 +10,9 @@ MORE_THAN_A_LIFETIME = datetime.timedelta(days=50000)
 
 
 def birthday_timeunit(
-    unit_name: str, seconds: int, granularity: int = 1
+    unit_name: str, seconds: int, decimal_digits: int = 0
 ) -> Callable:
+    granularity = 1 / (10**decimal_digits)
     range_end = MORE_THAN_A_LIFETIME // (
         datetime.timedelta(seconds=seconds) * granularity
     )
@@ -46,8 +47,9 @@ def birthday_timeunit(
 def birthday_planet(
     planet_name: str,
     orbital_period: datetime.timedelta,
-    granularity: float = 1.0
+    decimal_digits: int = 0
 ) -> Callable:
+    granularity = 1 / (10**decimal_digits)
     range_end = datetime.timedelta(days=50000
                                    ) // (orbital_period * granularity)
 
@@ -83,20 +85,20 @@ def birthday_planet(
 
 
 birthday_generators = [
-    birthday_timeunit('seconds', 1, 10000000),
-    birthday_timeunit('minutes', 60, 1000000),
-    birthday_timeunit('hours', 60 * 60, 10000),
-    birthday_timeunit('days', 60 * 60 * 24, 100),
-    birthday_timeunit('weeks', 60 * 60 * 24 * 7, 100),
+    birthday_timeunit('seconds', 1, -7),
+    birthday_timeunit('minutes', 60, -6),
+    birthday_timeunit('hours', 60 * 60, -4),
+    birthday_timeunit('days', 60 * 60 * 24, -2),
+    birthday_timeunit('weeks', 60 * 60 * 24 * 7, -2),
     birthday_planet('Mercury', datetime.timedelta(seconds=7600530.24)),
     birthday_planet('Venus', datetime.timedelta(seconds=19414166.4)),
     birthday_planet('Earth', datetime.timedelta(days=365.256363004)),
     birthday_planet('Mars', datetime.timedelta(seconds=59354294.4)),
-    birthday_planet('Jupiter', datetime.timedelta(seconds=374335776), 0.1),
-    birthday_planet('Saturn', datetime.timedelta(seconds=929596608), 0.1),
-    birthday_planet('Uranus', datetime.timedelta(seconds=2651486400), 0.01),
-    birthday_planet('Neptune', datetime.timedelta(seconds=5199724800), 0.01),
-    birthday_planet('Pluto', datetime.timedelta(seconds=7824384000), 0.01),
+    birthday_planet('Jupiter', datetime.timedelta(seconds=374335776), 1),
+    birthday_planet('Saturn', datetime.timedelta(seconds=929596608), 1),
+    birthday_planet('Uranus', datetime.timedelta(seconds=2651486400), 2),
+    birthday_planet('Neptune', datetime.timedelta(seconds=5199724800), 2),
+    birthday_planet('Pluto', datetime.timedelta(seconds=7824384000), 2),
 ]
 
 
