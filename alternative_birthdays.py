@@ -2,6 +2,7 @@
 import argparse
 import datetime
 import logging
+import zoneinfo
 from typing import Callable, Iterator
 
 log = logging.getLogger(__name__)
@@ -102,15 +103,21 @@ birthday_generators = [
 ]
 
 
-def parse_date(input_str: str) -> datetime.datetime:
+def parse_date(
+    input_str: str, timezone: zoneinfo.ZoneInfo
+) -> datetime.datetime:
     year, month, day = input_str.split('-', 2)
-    date = datetime.datetime(int(year), int(month), int(day), 12, 0)
+    date = datetime.datetime(
+        int(year), int(month), int(day), 12, 0, tzinfo=timezone
+    )
     return date
 
 
-def parse_datetime(input_str: str) -> datetime.datetime:
+def parse_datetime(
+    input_str: str, timezone: zoneinfo.ZoneInfo
+) -> datetime.datetime:
     datestr, timestr = input_str.split(' ', 1)
-    date = parse_date(datestr)
+    date = parse_date(datestr, timezone)
     hour, minute = timestr.split(':', 1)
     date = date.replace(hour=int(hour), minute=int(minute))
     return date
@@ -126,6 +133,12 @@ def main():
         help='Birthday in ISO format (YYYY-MM-DD HH:MM), time is optional'
     )
     parser.add_argument(
+        '--timezone',
+        type=str,
+        default='Europe/Berlin',
+        help='Birthday timezone (default: Europe/Berlin)'
+    )
+    parser.add_argument(
         '--start', help='start date in ISO format (YYYY-MM-DD)'
     )
     parser.add_argument('--end', help='end date in ISO format (YYYY-MM-DD)')
@@ -135,19 +148,22 @@ def main():
         raise ValueError('Invalid log level: {}'.format(args.loglevel))
     logging.basicConfig(level=loglevel)
 
+    tz = zoneinfo.ZoneInfo(args.timezone)
     if ':' in args.birthday:
         log.debug('birthday has time')
-        birthday = parse_datetime(args.birthday)
+        birthday = parse_datetime(args.birthday, tz)
     else:
         log.debug('birthday is blank date, assuming 12:00')
-        birthday = parse_date(args.birthday)
-    today = datetime.datetime.today()
+        birthday = parse_date(args.birthday, tz)
+    log.debug(f'{birthday=}')
+    today = datetime.datetime.now(tz=tz)
+    log.debug(f'{today=}')
     if args.start:
-        start = parse_date(args.start)
+        start = parse_date(args.start, tz)
     else:
         start = today
     if args.end:
-        end = parse_date(args.end)
+        end = parse_date(args.end, tz)
     else:
         end = today + datetime.timedelta(days=365 * 3)
     birthday_list: list[tuple[datetime.datetime, str]] = list()
