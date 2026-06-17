@@ -125,6 +125,8 @@ def parse_datetime(
 
 def main():
     parser = argparse.ArgumentParser()
+    local_tz = datetime.datetime.now(datetime.timezone.utc).astimezone().tzinfo
+    supported_timezones = sorted(list(zoneinfo.available_timezones()))
     parser.add_argument(
         '--loglevel', default='WARNING', help="Loglevel", action='store'
     )
@@ -133,10 +135,18 @@ def main():
         help='Birthday in ISO format (YYYY-MM-DD HH:MM), time is optional'
     )
     parser.add_argument(
-        '--timezone',
+        '--input-timezone',
         type=str,
-        default='Europe/Berlin',
-        help='Birthday timezone (default: Europe/Berlin)'
+        default=local_tz,
+        choices=supported_timezones,
+        help=f'Input timezone (default: {local_tz})'
+    )
+    parser.add_argument(
+        '--output-timezone',
+        type=str,
+        default=local_tz,
+        choices=supported_timezones,
+        help=f'Output timezone (default: {local_tz})'
     )
     parser.add_argument(
         '--start', help='start date in ISO format (YYYY-MM-DD)'
@@ -148,29 +158,38 @@ def main():
         raise ValueError('Invalid log level: {}'.format(args.loglevel))
     logging.basicConfig(level=loglevel)
 
-    tz = zoneinfo.ZoneInfo(args.timezone)
+    def get_tz(tz: str | datetime.tzinfo):
+        if isinstance(tz, datetime.tzinfo):
+            return tz
+        else:
+            return zoneinfo.ZoneInfo(tz)
+
+    itz = get_tz(args.input_timezone)
+    otz = get_tz(args.output_timezone)
+
     if ':' in args.birthday:
         log.debug('birthday has time')
-        birthday = parse_datetime(args.birthday, tz)
+        birthday = parse_datetime(args.birthday, itz)
     else:
         log.debug('birthday is blank date, assuming 12:00')
-        birthday = parse_date(args.birthday, tz)
+        birthday = parse_date(args.birthday, itz)
     log.debug(f'{birthday=}')
-    today = datetime.datetime.now(tz=tz)
+    today = datetime.datetime.now(tz=itz)
     log.debug(f'{today=}')
     if args.start:
-        start = parse_date(args.start, tz)
+        start = parse_date(args.start, itz)
     else:
         start = today
     if args.end:
-        end = parse_date(args.end, tz)
+        end = parse_date(args.end, itz)
     else:
         end = today + datetime.timedelta(days=365 * 3)
     birthday_list: list[tuple[datetime.datetime, str]] = list()
     for generator in birthday_generators:
         birthday_list += list(generator(birthday, start, end))
     for date, description in sorted(birthday_list):
-        print(f"{date:%F %H:%M %z} {description}")
+        odate = date.astimezone(tz=otz)
+        print(f"{odate:%F %H:%M %z} {description}")
 
 
 if __name__ == '__main__':
