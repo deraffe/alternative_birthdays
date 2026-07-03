@@ -13,6 +13,12 @@ log = logging.getLogger(__name__)
 MORE_THAN_A_LIFETIME = datetime.timedelta(days=50000)
 
 
+@dataclass
+class Birthday:
+    date: datetime.datetime
+    age: float
+    description: str
+
 def birthday_timeunit(
     unit_name: str, seconds: int, decimal_digits: int = 0
 ) -> Callable:
@@ -26,7 +32,7 @@ def birthday_timeunit(
         start: datetime.datetime,
         end: datetime.datetime,
         granularity: float = granularity
-    ) -> Iterator[tuple[datetime.datetime, str]]:
+    ) -> Iterator[Birthday]:
         time_start = (start - birthday).total_seconds() / seconds
         time_end = (end - birthday).total_seconds() / seconds
         for i in range(1, range_end):
@@ -43,7 +49,7 @@ def birthday_timeunit(
                     description = f"{units:.1f} {unit_name}"
                 else:
                     description = f"{units:.0f} {unit_name}"
-                yield date, description
+                yield Birthday(date=date, age=units, description=description)
 
     return bday_time
 
@@ -62,7 +68,7 @@ def birthday_planet(
         start: datetime.datetime,
         end: datetime.datetime,
         granularity: float = granularity
-    ) -> Iterator[tuple[datetime.datetime, str]]:
+    ) -> Iterator[Birthday]:
         planet_start = (start - birthday) / orbital_period
         planet_end = (end - birthday) / orbital_period
         for i in range(1, range_end):
@@ -83,7 +89,7 @@ def birthday_planet(
                     description = f"{pyears:.1f} {planet_name} years"
                 else:
                     description = f"{pyears:.0f} {planet_name} years"
-                yield date, description
+                yield Birthday(date=date, age=pyears, description=description)
 
     return bday_planet
 
@@ -161,6 +167,11 @@ def parse_datetime(
     return date
 
 
+def _birthdays(birthday, start, end) -> Iterator[Birthday]:
+    for generator in birthday_generators:
+        yield from generator(birthday, start, end)
+
+
 def birthdays(args, params: Parameters) -> None:
     itz = params.input_timezone
     today = params.today
@@ -174,12 +185,10 @@ def birthdays(args, params: Parameters) -> None:
         end = parse_date(args.end, itz)
     else:
         end = today + datetime.timedelta(days=365 * 3)
-    birthday_list: list[tuple[datetime.datetime, str]] = list()
-    for generator in birthday_generators:
-        birthday_list += list(generator(birthday, start, end))
-    for date, description in sorted(birthday_list):
-        odate = date.astimezone(tz=otz)
-        print(f"{odate:%F %H:%M %z} {description}")
+    birthday_list: list[Birthday] = list(_birthdays(birthday, start, end))
+    for b in sorted(birthday_list, key=lambda b: b.date):
+        odate = b.date.astimezone(tz=otz)
+        print(f"{odate:%F %H:%M %z} {b.description}")
 
 
 def _configure_common_options(parser: argparse.ArgumentParser) -> None:
