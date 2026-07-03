@@ -2,8 +2,11 @@
 import argparse
 import datetime
 import logging
+import os
+import sys
 import zoneinfo
 from typing import Callable, Iterator
+from dataclasses import dataclass
 
 log = logging.getLogger(__name__)
 
@@ -103,6 +106,41 @@ birthday_generators = [
 ]
 
 
+@dataclass
+class Parameters:
+    birthday: datetime.datetime
+    today: datetime.datetime
+    input_timezone: datetime.tzinfo
+    output_timezone: datetime.tzinfo
+
+
+def set_default_subparser(self, name, args=None, index=None):
+    """default subparser selection. Call after setup, just before parse_args()
+    name: is the name of the subparser to call by default
+    args: if set is the argument list handed to parse_args()
+
+    https://stackoverflow.com/a/26379693
+    """
+    subparser_found = False
+    for arg in sys.argv[1:]:
+        if arg in ['-h', '--help']:  # global help if no subparser
+            break
+    else:
+        for x in self._subparsers._actions:
+            if not isinstance(x, argparse._SubParsersAction):
+                continue
+            for sp_name in x._name_parser_map.keys():
+                if sp_name in sys.argv[1:]:
+                    subparser_found = True
+        if not subparser_found:
+            if args is None:
+                log.debug(f"{sys.argv=}")
+                sys.argv.insert(index or 1, name)
+                log.debug(f"{sys.argv=}")
+            else:
+                args.insert(index or 1, name)
+
+
 def parse_date(
     input_str: str, timezone: zoneinfo.ZoneInfo
 ) -> datetime.datetime:
@@ -123,16 +161,35 @@ def parse_datetime(
     return date
 
 
-def main():
-    parser = argparse.ArgumentParser()
+def birthdays(args, params: Parameters) -> None:
+    itz = params.input_timezone
+    today = params.today
+    birthday = params.birthday
+    otz = params.output_timezone
+    if args.start:
+        start = parse_date(args.start, itz)
+    else:
+        start = today
+    if args.end:
+        end = parse_date(args.end, itz)
+    else:
+        end = today + datetime.timedelta(days=365 * 3)
+    birthday_list: list[tuple[datetime.datetime, str]] = list()
+    for generator in birthday_generators:
+        birthday_list += list(generator(birthday, start, end))
+    for date, description in sorted(birthday_list):
+        odate = date.astimezone(tz=otz)
+        print(f"{odate:%F %H:%M %z} {description}")
+
+
+def _configure_common_options(parser: argparse.ArgumentParser) -> None:
     local_tz = datetime.datetime.now(datetime.timezone.utc).astimezone().tzinfo
     supported_timezones = sorted(list(zoneinfo.available_timezones()))
     parser.add_argument(
         '--loglevel', default='WARNING', help="Loglevel", action='store'
     )
     parser.add_argument(
-        'birthday',
-        help='Birthday in ISO format (YYYY-MM-DD HH:MM), time is optional'
+        "birthday", help="Birthday in ISO format (YYYY-MM-DD HH:MM), time is optional"
     )
     parser.add_argument(
         '--input-timezone',
@@ -148,11 +205,27 @@ def main():
         choices=supported_timezones,
         help=f'Output timezone (default: {local_tz})'
     )
-    parser.add_argument(
-        '--start', help='start date in ISO format (YYYY-MM-DD)'
+
+
+def main():
+    if "DEBUG" in os.environ:
+        logging.basicConfig(level=logging.DEBUG)
+    argparse.ArgumentParser.set_default_subparser = set_default_subparser
+    main_parser = argparse.ArgumentParser()
+    subparsers = main_parser.add_subparsers()
+
+    birthdays_parser = subparsers.add_parser(
+        "birthdays", help="Display birthdays in a range"
     )
-    parser.add_argument('--end', help='end date in ISO format (YYYY-MM-DD)')
-    args = parser.parse_args()
+    _configure_common_options(birthdays_parser)
+    birthdays_parser.set_defaults(func=birthdays)
+    birthdays_parser.add_argument(
+        "--start", help="start date in ISO format (YYYY-MM-DD)"
+    )
+    birthdays_parser.add_argument("--end", help="end date in ISO format (YYYY-MM-DD)")
+
+    main_parser.set_default_subparser("birthdays")
+    args = main_parser.parse_args()
     loglevel = getattr(logging, args.loglevel.upper(), None)
     if not isinstance(loglevel, int):
         raise ValueError('Invalid log level: {}'.format(args.loglevel))
@@ -176,20 +249,11 @@ def main():
     log.debug(f'{birthday=}')
     today = datetime.datetime.now(tz=itz)
     log.debug(f'{today=}')
-    if args.start:
-        start = parse_date(args.start, itz)
-    else:
-        start = today
-    if args.end:
-        end = parse_date(args.end, itz)
-    else:
-        end = today + datetime.timedelta(days=365 * 3)
-    birthday_list: list[tuple[datetime.datetime, str]] = list()
-    for generator in birthday_generators:
-        birthday_list += list(generator(birthday, start, end))
-    for date, description in sorted(birthday_list):
-        odate = date.astimezone(tz=otz)
-        print(f"{odate:%F %H:%M %z} {description}")
+
+    params = Parameters(
+        birthday=birthday, today=today, input_timezone=itz, output_timezone=otz
+    )
+    args.func(args, params)
 
 
 if __name__ == '__main__':
