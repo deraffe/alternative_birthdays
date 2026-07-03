@@ -191,6 +191,13 @@ def birthdays(args, params: Parameters) -> None:
         print(f"{odate:%F %H:%M %z} {b.description}")
 
 
+def age(args, params: Parameters) -> None:
+    for generator in birthday_generators:
+        *_, last = generator(params.birthday, params.birthday, params.today)
+        odate = last.date.astimezone(tz=params.output_timezone)
+        print(f"{odate:%F %H:%M %z} {last.description}")
+
+
 def _configure_common_options(parser: argparse.ArgumentParser) -> None:
     local_tz = datetime.datetime.now(datetime.timezone.utc).astimezone().tzinfo
     supported_timezones = sorted(list(zoneinfo.available_timezones()))
@@ -221,7 +228,7 @@ def main():
         logging.basicConfig(level=logging.DEBUG)
     argparse.ArgumentParser.set_default_subparser = set_default_subparser
     main_parser = argparse.ArgumentParser()
-    subparsers = main_parser.add_subparsers()
+    subparsers = main_parser.add_subparsers(dest="subcommand")
 
     birthdays_parser = subparsers.add_parser(
         "birthdays", help="Display birthdays in a range"
@@ -233,12 +240,18 @@ def main():
     )
     birthdays_parser.add_argument("--end", help="end date in ISO format (YYYY-MM-DD)")
 
+    age_parser = subparsers.add_parser("age", help="Display the current age for a given birthday")
+    _configure_common_options(age_parser)
+    age_parser.set_defaults(func=age)
+
     main_parser.set_default_subparser("birthdays")
     args = main_parser.parse_args()
     loglevel = getattr(logging, args.loglevel.upper(), None)
     if not isinstance(loglevel, int):
         raise ValueError('Invalid log level: {}'.format(args.loglevel))
     logging.basicConfig(level=loglevel)
+
+    log.debug(f"{args=}")
 
     def get_tz(tz: str | datetime.tzinfo):
         if isinstance(tz, datetime.tzinfo):
